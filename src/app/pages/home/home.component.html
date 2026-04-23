@@ -1,0 +1,118 @@
+<div class="dashboard-page">
+  <section class="hero-card">
+    <div>
+      <p class="eyebrow">Panel administrativo</p>
+      <h1>Dashboard de inventario y movimientos</h1>
+      <p class="hero-copy">
+        Consulta productos críticos, movimientos recientes y ejecuta el corte diario cuando cierre la operación.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <div class="hero-actions-buttons">
+        <button class="cut-btn" type="button" (click)="realizarCorteDiario()" [disabled]="realizandoCorte || restaurandoCorte || cargandoProductos">
+          {{ realizandoCorte ? 'Procesando corte...' : 'Realizar corte diario' }}
+        </button>
+
+        <button class="cut-btn secondary" type="button" (click)="restaurarUltimoCorte()" [disabled]="restaurandoCorte || realizandoCorte || cargandoUltimoCorte || !ultimoCorte">
+          {{ restaurandoCorte ? 'Restaurando corte...' : 'Regresar al corte anterior' }}
+        </button>
+      </div>
+
+      <div class="cut-info" *ngIf="!cargandoUltimoCorte && ultimoCorte; else noCutYet">
+        <strong>Último corte:</strong> {{ ultimoCorte.fechaCorte }}
+        <span class="dot">•</span>
+        {{ ultimoCorte.createdByNombre || 'Administrador' }}
+      </div>
+      <ng-template #noCutYet>
+        <div class="cut-info" *ngIf="!cargandoUltimoCorte">Aún no hay cortes registrados.</div>
+      </ng-template>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-label">Productos registrados</span>
+      <strong class="stat-value">{{ totalProductos }}</strong>
+      <small class="stat-meta">Catálogo total en inventario</small>
+    </article>
+
+    <article class="stat-card warning">
+      <span class="stat-label">Productos críticos</span>
+      <strong class="stat-value">{{ productosCriticos }}</strong>
+      <small class="stat-meta">Con saldo total menor o igual a 10</small>
+    </article>
+
+    <article class="stat-card accent">
+      <span class="stat-label">Movimientos hoy</span>
+      <strong class="stat-value">{{ movimientosHoy }}</strong>
+      <small class="stat-meta">Registros capturados en auditoría</small>
+    </article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel-card">
+      <div class="panel-head">
+        <div>
+          <h2>Productos con stock crítico</h2>
+          <p>Te ayuda a detectar material con baja disponibilidad.</p>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="cargandoProductos">Cargando productos...</div>
+
+      <div class="product-list" *ngIf="!cargandoProductos && productosCriticos > 0">
+        <div class="product-row" *ngFor="let producto of productosCriticosLista">
+          <div>
+            <strong>{{ producto.nombre }}</strong>
+            <p>{{ producto.categoria || 'Sin categoría' }}</p>
+          </div>
+          <span class="chip danger">Saldo: {{ getSaldoTotalProducto(producto) }}</span>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!cargandoProductos && productosCriticos === 0">
+        No hay productos críticos por ahora.
+      </div>
+    </article>
+
+    <article class="panel-card wide">
+      <div class="panel-head">
+        <div>
+          <h2>Registro de movimientos</h2>
+          <p>Últimas acciones realizadas por empleados y administradores en inventario.</p>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="cargandoMovimientos">Cargando movimientos...</div>
+
+      <div class="movements" *ngIf="!cargandoMovimientos && movimientos.length > 0">
+        <div class="movement-card" *ngFor="let mov of movimientos">
+          <div class="movement-top">
+            <div>
+              <strong>{{ mov.producto || 'Producto no identificado' }}</strong>
+              <p>
+                {{ getNombreUsuario(mov) }}
+                <span class="dot">•</span>
+                {{ mov.accion || 'Movimiento' }}
+              </p>
+            </div>
+            <span class="chip" [class.employee]="mov.usuarioRole === 'employee'" [class.admin]="mov.usuarioRole === 'admin'">
+              {{ mov.usuarioRole === 'admin' ? 'Admin' : (mov.usuarioRole === 'employee' ? 'Empleado' : 'Usuario') }}
+            </span>
+          </div>
+
+          <div class="movement-summary">
+            <span class="summary-item" *ngFor="let item of getResumen(mov)">{{ item }}</span>
+          </div>
+
+          <div class="movement-date">{{ formatFecha(mov.fecha) }}</div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!cargandoMovimientos && movimientos.length === 0">
+        Aún no hay movimientos registrados en la auditoría.
+      </div>
+    </article>
+  </section>
+</div>

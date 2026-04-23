@@ -1,0 +1,185 @@
+<div class="page-wrap">
+  <div class="toast-container" [class.show]="mostrarToast">
+    <div class="toast-content">
+      <span class="toast-icon">✓</span>
+      <span class="toast-msg">{{ mensajeToast }}</span>
+    </div>
+  </div>
+
+  <div class="page-header">
+    <div class="page-title">
+      <h1>GESTIÓN DE PRODUCTOS</h1>
+      <p class="page-subtitle">Misma vista para Admin y Empleado, respetando permisos por rol</p>
+      <div class="title-line"></div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-accent-soft" (click)="cargarProductos()">🔄 Refrescar</button>
+      <button class="btn btn-primary" (click)="abrirModalNuevoProducto()" *ngIf="esAdmin">➕ Añadir Producto</button>
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <label class="search-label" for="filtro-producto">Buscar producto</label>
+    <input
+      id="filtro-producto"
+      class="search-input"
+      type="text"
+      [(ngModel)]="filtroProducto"
+      placeholder="Escribe nombre, categoría o proveedor"
+    >
+    <div class="search-meta">Mostrando {{ filasFiltradas.length }} de {{ productos.length }} productos</div>
+  </div>
+
+  <div class="card-soft">
+    <div class="card-soft-inner">
+      <h2 class="section-title">
+        {{ esAdmin ? '⚡ Modo Administrador (edición total)' : '👁️ Modo Empleado (edición limitada)' }}
+      </h2>
+
+      <form [formGroup]="tablaForm">
+        <div class="table-responsive desktop-only" *ngIf="filasFiltradas.length > 0">
+          <table class="table-soft">
+            <thead>
+              <tr class="thead-top">
+                <th rowspan="2">Material</th>
+                <th rowspan="2">Inicial</th>
+                <th colspan="3">Ventas</th>
+                <th>Compras</th>
+                <th>Saldo B1</th>
+                <th colspan="4">Bodega 2</th>
+                <th rowspan="2">Físico</th>
+                <th rowspan="2">Total</th>
+                <th rowspan="2" class="col-actions" *ngIf="esAdmin">Acciones</th>
+              </tr>
+              <tr class="thead-sub">
+                <th>Cobrados</th>
+                <th>Pers.</th>
+                <th>Repar.</th>
+                <th>Entr.</th>
+                <th>Final</th>
+                <th>Exist.</th>
+                <th>Ent.</th>
+                <th>Sal.</th>
+                <th>Saldo</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of filasFiltradas; trackBy: trackByFila"
+                  [formGroup]="item.control"
+                  [attr.data-index]="item.index"
+                  [class.row-alert]="getSaldoTotal(item.index) <= 10">
+                <td>
+                  <input formControlName="nombre" class="excel-input cell-strong text-left"
+                         [readonly]="!esAdmin"
+                         [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'"
+                         placeholder="Nombre del producto">
+                </td>
+
+                <td><input type="number" min="0" formControlName="b1InicialDia" class="excel-input" [readonly]="!esAdmin" [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'" (keydown)="moverAbajo($event, item.index, 'b1InicialDia')"></td>
+                <td><input type="number" min="0" formControlName="b1CobradosNoEntregados" class="excel-input" [readonly]="!esAdmin" [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'" (keydown)="moverAbajo($event, item.index, 'b1CobradosNoEntregados')"></td>
+                <td><input type="number" min="0" formControlName="b1SalidaPersonal" class="excel-input" [readonly]="!esAdmin && !esCampoEditable('b1SalidaPersonal')" [style.background]="!esAdmin && esCampoEditable('b1SalidaPersonal') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')" (keydown)="moverAbajo($event, item.index, 'b1SalidaPersonal')"></td>
+                <td><input type="number" min="0" formControlName="b1SalidaRepartos" class="excel-input" [readonly]="!esAdmin && !esCampoEditable('b1SalidaRepartos')" [style.background]="!esAdmin && esCampoEditable('b1SalidaRepartos') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')" (keydown)="moverAbajo($event, item.index, 'b1SalidaRepartos')"></td>
+                <td><input type="number" min="0" formControlName="b1EntradaBodega" class="excel-input" [readonly]="!esAdmin && !esCampoEditable('b1EntradaBodega')" [style.background]="!esAdmin && esCampoEditable('b1EntradaBodega') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')" (keydown)="moverAbajo($event, item.index, 'b1EntradaBodega')"></td>
+                <td class="num cell-strong bg-calc">{{ getSaldoB1(item.index) }}</td>
+                <td><input type="number" min="0" formControlName="b2Existencia" class="excel-input" [readonly]="!esAdmin" [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'" (keydown)="moverAbajo($event, item.index, 'b2Existencia')"></td>
+                <td><input type="number" min="0" formControlName="b2Entrada" class="excel-input" [readonly]="!esAdmin && !esCampoEditable('b2Entrada')" [style.background]="!esAdmin && esCampoEditable('b2Entrada') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')" (keydown)="moverAbajo($event, item.index, 'b2Entrada')"></td>
+                <td><input type="number" min="0" formControlName="b2Salida" class="excel-input" [readonly]="!esAdmin && !esCampoEditable('b2Salida')" [style.background]="!esAdmin && esCampoEditable('b2Salida') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')" (keydown)="moverAbajo($event, item.index, 'b2Salida')"></td>
+                <td class="num cell-strong bg-calc">{{ getSaldoB2(item.index) }}</td>
+                <td><input type="number" min="0" formControlName="inventarioFisicoFerreteria" class="excel-input" [readonly]="!esAdmin" [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'" (keydown)="moverAbajo($event, item.index, 'inventarioFisicoFerreteria')"></td>
+                <td class="num cell-strong" [style.color]="getSaldoTotal(item.index) <= 10 ? '#ef4444' : 'var(--text)'">{{ getSaldoTotal(item.index) }}</td>
+
+                <td class="actions" *ngIf="esAdmin">
+                  <button class="icon-btn delete" type="button" (click)="eliminarDesdeTabla(item.producto)" title="Eliminar producto">🗑</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mobile-cards" *ngIf="filasFiltradas.length > 0">
+          <article class="product-card-mobile"
+                   *ngFor="let item of filasFiltradas; trackBy: trackByFila"
+                   [formGroup]="item.control"
+                   [class.row-alert]="getSaldoTotal(item.index) <= 10">
+            <div class="mobile-head">
+              <div>
+                <label>Material</label>
+                <input formControlName="nombre" class="mobile-input title-input"
+                       [readonly]="!esAdmin"
+                       [style.background]="!esAdmin ? '#f5f5f5' : '#fff'">
+              </div>
+              <span class="mobile-total">Total: {{ getSaldoTotal(item.index) }}</span>
+            </div>
+
+            <div class="mobile-grid">
+              <div class="field"><label>Inicial</label><input type="number" min="0" formControlName="b1InicialDia" class="mobile-input" [readonly]="!esAdmin"></div>
+              <div class="field"><label>Cobrados</label><input type="number" min="0" formControlName="b1CobradosNoEntregados" class="mobile-input" [readonly]="!esAdmin"></div>
+              <div class="field editable"><label>Pers.</label><input type="number" min="0" formControlName="b1SalidaPersonal" class="mobile-input" [readonly]="!esAdmin && !esCampoEditable('b1SalidaPersonal')"></div>
+              <div class="field editable"><label>Repar.</label><input type="number" min="0" formControlName="b1SalidaRepartos" class="mobile-input" [readonly]="!esAdmin && !esCampoEditable('b1SalidaRepartos')"></div>
+              <div class="field editable"><label>Entr. B1</label><input type="number" min="0" formControlName="b1EntradaBodega" class="mobile-input" [readonly]="!esAdmin && !esCampoEditable('b1EntradaBodega')"></div>
+              <div class="field calc"><label>Saldo B1</label><div class="value-box">{{ getSaldoB1(item.index) }}</div></div>
+              <div class="field"><label>Exist. B2</label><input type="number" min="0" formControlName="b2Existencia" class="mobile-input" [readonly]="!esAdmin"></div>
+              <div class="field editable"><label>Ent. B2</label><input type="number" min="0" formControlName="b2Entrada" class="mobile-input" [readonly]="!esAdmin && !esCampoEditable('b2Entrada')"></div>
+              <div class="field editable"><label>Sal. B2</label><input type="number" min="0" formControlName="b2Salida" class="mobile-input" [readonly]="!esAdmin && !esCampoEditable('b2Salida')"></div>
+              <div class="field calc"><label>Saldo B2</label><div class="value-box">{{ getSaldoB2(item.index) }}</div></div>
+              <div class="field"><label>Físico</label><input type="number" min="0" formControlName="inventarioFisicoFerreteria" class="mobile-input" [readonly]="!esAdmin"></div>
+            </div>
+
+            <div class="mobile-actions" *ngIf="esAdmin">
+              <button class="btn btn-danger-soft" type="button" (click)="eliminarDesdeTabla(item.producto)">Eliminar</button>
+            </div>
+          </article>
+        </div>
+      </form>
+
+      <div class="empty-filter" *ngIf="filasFiltradas.length === 0">
+        No se encontraron productos con ese criterio.
+      </div>
+
+      <div class="toolbar save-toolbar" *ngIf="!esAdmin">
+        <button class="btn btn-primary" (click)="guardarCambiosEmployee()">💾 GUARDAR CAMBIOS</button>
+      </div>
+
+      <div class="hint-box" *ngIf="!esAdmin">
+        <strong>Campos editables para empleado:</strong> Pers., Repar., Entr. (B1), Ent. B2 y Sal. B2.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-back" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">➕ Nuevo Producto</div>
+      <button class="modal-x" type="button" (click)="cerrarModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="modal-label">Nombre del producto <span class="required">*</span></label>
+      <input class="modal-input" [(ngModel)]="nuevoProducto.nombre" placeholder="Ej: Martillo 16oz" required>
+
+      <label class="modal-label spaced">Cantidad inicial <span class="required">*</span></label>
+      <input class="modal-input" type="number" step="1" min="0" [(ngModel)]="nuevoProducto.cantidad" placeholder="0">
+
+      <label class="modal-label spaced">Categoría</label>
+      <select class="modal-input" [(ngModel)]="nuevoProducto.categoria">
+        <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+      </select>
+
+      <label class="modal-label spaced">Precio</label>
+      <input class="modal-input" type="number" step="1" min="0" [(ngModel)]="nuevoProducto.precio" placeholder="0">
+
+      <label class="modal-label spaced">Proveedor</label>
+      <input class="modal-input" [(ngModel)]="nuevoProducto.proveedor" placeholder="Ej: Proveedor S.A.">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-accent-soft" type="button" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" (click)="guardarNuevoProducto()" [disabled]="!nuevoProducto.nombre || nuevoProducto.cantidad === undefined">
+        Guardar Producto
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="login-wrap">
+  <div class="login-card">
+
+    <div class="accent-strip"></div>
+
+    <div class="logo-float">
+      <img src="/assets/logo.png" alt="Logo" />
+    </div>
+
+    <div class="login-content">
+      <section class="login-form">
+        <h2 class="title">Iniciar Sesión</h2>
+        <p class="subtitle">Ingresa tus credenciales para acceder.</p>
+
+        <form class="form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+          <div class="field">
+            <label class="label">Email</label>
+            <input class="input" type="email" placeholder="usuario@email.com"
+                   formControlName="email" autocomplete="username" />
+            @if(form.get('email')?.touched && form.get('email')?.errors){
+              <small class="error">El correo es inválido</small>
+            }
+          </div>
+
+          <div class="field">
+            <label class="label">Contraseña</label>
+            <input class="input" type="password" placeholder="••••••••••"
+                   formControlName="password" autocomplete="current-password" />
+            @if((form.get('password')?.touched && form.get('password')?.errors) || error){
+              <small class="error">Contraseña incorrecta</small>
+            }
+          </div>
+
+          <button type="submit" class="btn">INICIAR SESIÓN</button>
+
+        </form>
+      </section>
+    </div>
+
+  </div>
+</div>

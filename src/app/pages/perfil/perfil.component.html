@@ -1,0 +1,89 @@
+<div class="perfil-shell">
+  <!-- Elegant animated background -->
+  <div class="perfil-bg-shape shape-1"></div>
+  <div class="perfil-bg-shape shape-2"></div>
+  <div class="perfil-bg-shape shape-3"></div>
+
+  <div class="perfil-container">
+    <header class="perfil-header">
+      <div class="header-content">
+        <span class="eyebrow"><i class="fas fa-shield-alt"></i> Panel de Control</span>
+        <h1 class="title">Mi Perfil</h1>
+        <p class="subtitle">Gestiona tu información personal y credenciales de acceso.</p>
+      </div>
+      <div class="role-badge" *ngIf="role">
+        <i class="fas" [ngClass]="role === 'admin' ? 'fa-user-shield' : 'fa-user-tie'"></i>
+        {{ role === 'admin' ? 'Administrador' : 'Empleado' }}
+      </div>
+    </header>
+
+    <div class="error-banner" *ngIf="errorMsg">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div class="error-content">
+        <strong>Error de carga</strong>
+        <span>{{ errorMsg }}</span>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="cargando">
+      <div class="spinner"></div>
+      <p>Cargando información...</p>
+    </div>
+
+    <div class="perfil-content" *ngIf="!cargando && !errorMsg">
+      <!-- Tarjeta de Información -->
+      <div class="profile-card info-card">
+        <div class="card-header">
+          <div class="header-text">
+            <h2>Datos Generales</h2>
+            <p>Información básica de tu cuenta</p>
+          </div>
+          <div class="avatar-display">
+            {{ (nombre || email || 'U').charAt(0).toUpperCase() }}
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="item-icon"><i class="fas fa-user"></i></div>
+            <div class="item-details">
+              <span class="label">Nombre Completo</span>
+              <span class="value">{{ nombre || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="item-icon"><i class="fas fa-envelope"></i></div>
+            <div class="item-details">
+              <span class="label">Correo Electrónico</span>
+              <span class="value">{{ email || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta QR -->
+      <div class="profile-card qr-card">
+        <div class="card-header">
+          <div class="header-text">
+            <h2>Código de Acceso</h2>
+            <p>Credencial digital (QR)</p>
+          </div>
+          <div class="qr-icon-placeholder"><i class="fas fa-qrcode"></i></div>
+        </div>
+
+        <div class="qr-display" *ngIf="qrDataUrl">
+          <div class="qr-wrapper">
+             <img [src]="qrDataUrl" alt="Código QR de Acceso" />
+             <div class="scanner-line"></div>
+          </div>
+        </div>
+
+        <div class="qr-instructions">
+          <i class="fas fa-info-circle"></i>
+          <p>Presenta este código QR en el escáner de la entrada para registrar tu asistencia automáticamente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

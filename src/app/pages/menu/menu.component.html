@@ -1,0 +1,114 @@
+<div class="shell">
+  <aside class="side">
+    <div class="side-top">
+      <div class="brand-hero">
+        <div class="logo-circle-container">
+          <img src="assets/logo.png" alt="Jordigo Logo" class="img-logo-blend" />
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">
+        <span class="section-tag">Operaciones</span>
+
+        <a
+          *ngIf="isAdmin"
+          routerLink="/menu/home"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+        >
+          <div class="link-icon"><i class="fas fa-chart-line"></i></div>
+          <span class="link-txt">Dashboard</span>
+        </a>
+
+        <a routerLink="/menu/producto" routerLinkActive="active" class="nav-link">
+          <div class="link-icon"><i class="fas fa-boxes"></i></div>
+          <span class="link-txt">Inventario</span>
+        </a>
+      </div>
+
+      <div class="nav-section" *ngIf="isAdmin">
+        <span class="section-tag">Gestión</span>
+
+        <a routerLink="/menu/empleado" routerLinkActive="active" class="nav-link">
+          <div class="link-icon"><i class="fas fa-users"></i></div>
+          <span class="link-txt">Colaboradores</span>
+        </a>
+
+        <a routerLink="/menu/asistencia" routerLinkActive="active" class="nav-link">
+          <div class="link-icon"><i class="fas fa-calendar-check"></i></div>
+          <span class="link-txt">Asistencia</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <span class="section-tag">Personal</span>
+
+        <a routerLink="/menu/perfil" routerLinkActive="active" class="nav-link">
+          <div class="link-icon"><i class="fas fa-user-shield"></i></div>
+          <span class="link-txt">Mi Perfil</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="side-footer">
+      <button
+        class="logout-circular"
+        type="button"
+        (click)="abrirModalSalir()"
+        title="Cerrar sesión"
+        aria-label="Cerrar sesión"
+      >
+        <i class="fas fa-power-off"></i>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-view-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <!-- MODAL DE CIERRE DE SESIÓN -->
+  <div
+    class="modal-blur-overlay"
+    *ngIf="showLogoutModal"
+    (click)="cancelarSalir()"
+  >
+    <div class="modal-card-glass" (click)="$event.stopPropagation()">
+      <div class="modal-accent-bar"></div>
+
+      <div class="modal-inner">
+        <div class="alert-icon-wrapper">
+          <i class="fas fa-door-open"></i>
+        </div>
+
+        <h3>¿Cerrar sesión?</h3>
+        <p>Tu sesión finalizará y volverás a la pantalla de inicio.</p>
+
+        <div class="modal-footer-btns">
+          <button
+            class="btn-secondary-pro"
+            type="button"
+            (click)="cancelarSalir()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            class="btn-danger-pro"
+            type="button"
+            (click)="confirmarSalir()"
+            [disabled]="cerrando"
+          >
+            <span *ngIf="!cerrando">Sí, salir</span>
+            <div *ngIf="cerrando" class="spinner-small"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

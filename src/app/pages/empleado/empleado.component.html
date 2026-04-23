@@ -1,0 +1,89 @@
+<div class="emp-page">
+  <div class="emp-top">
+    <div>
+      <h1 class="emp-h1">Empleados</h1>
+      <p class="emp-sub">Administra tu personal de forma simple y ordenada</p>
+    </div>
+
+    <button class="btn-primary" type="button" (click)="openAddModal()" [disabled]="loading">
+      + Agregar empleado
+    </button>
+  </div>
+
+  <div class="alert" *ngIf="errorMsg">
+    {{ errorMsg }}
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Administrar empleados</div>
+      <span class="badge">{{ empleados.length }} total</span>
+    </div>
+
+    <div class="list" *ngIf="empleados.length > 0; else emptyEmp">
+      <div class="row" *ngFor="let e of empleados">
+        <div class="left">
+          <span class="avatar">{{ initials(e.nombre) }}</span>
+
+          <div class="meta">
+            <div class="name">{{ e.nombre }}</div>
+            <div class="mini">
+              {{ e.role === 'admin' ? 'Admin' : 'Empleado' }}
+              <span *ngIf="e.email"> • {{ e.email }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-soft" type="button" (click)="openEditModal(e)" [disabled]="loading">
+            Editar
+          </button>
+          <button class="btn-danger" type="button" (click)="confirmDelete(e)" [disabled]="loading">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyEmp>
+      <div class="empty">
+        Aún no hay empleados. Usa “Agregar empleado”.
+      </div>
+    </ng-template>
+  </section>
+
+  <div class="modal-back" *ngIf="modalOpen" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title">{{ modalMode === 'add' ? 'Nuevo empleado' : 'Editar empleado' }}</div>
+        <button class="modal-x" type="button" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="m-label">Nombre</label>
+        <input class="m-input" [(ngModel)]="modalNombre" placeholder="Ej: Juan Pérez" />
+
+        <ng-container *ngIf="modalMode === 'add'">
+          <label class="m-label spaced">Correo</label>
+          <input class="m-input" [(ngModel)]="modalEmail" placeholder="Ej: juan@empresa.com" />
+
+          <label class="m-label spaced">Contraseña temporal</label>
+          <input class="m-input" type="password" [(ngModel)]="modalPasswordTemp" placeholder="Mínimo 6 caracteres" />
+
+          <label class="m-label spaced">Rol</label>
+          <select class="m-input" [(ngModel)]="modalRole">
+            <option value="employee">Empleado</option>
+            <option value="admin">Admin</option>
+          </select>
+        </ng-container>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-soft" type="button" (click)="closeModal()">Cancelar</button>
+        <button class="btn-primary" type="button" (click)="saveModal()" [disabled]="loading">
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

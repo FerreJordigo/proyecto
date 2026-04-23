@@ -1,0 +1,14 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: auto;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  background: #f3f4f6;
+}
+
+* {
+  box-sizing: border-box;
+}
